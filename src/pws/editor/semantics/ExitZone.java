@@ -85,7 +85,7 @@ public class ExitZone implements Serializable {
 
     @Override
     public String toString() {
-        return source.getMachineId() + ": " + source.getStateName() + "⇒" + target.getStateName();
+        return source.getMachineId() + "." + source.getStateName() + "⇒" + source.getMachineId() + "." + target.getStateName();
         // return source.toString() + "⧴" + target.toString();
         // return target.toString();
     }

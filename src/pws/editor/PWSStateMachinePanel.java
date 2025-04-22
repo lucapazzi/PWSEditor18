@@ -137,7 +137,14 @@ public class PWSStateMachinePanel extends StateMachinePanel {
             // drawTriggerAnnotation(g2d, t, p0, cp, p2);
         } else {
             int circleRadius = 5;
-            g2d.setColor(Color.WHITE);
+            // Gray for autonomous initial transitions from PseudoState, white otherwise
+            if (!t.isTriggerable()
+                && t.getSource() instanceof PWSState
+                && ((PWSState) t.getSource()).isPseudoState()) {
+                g2d.setColor(Color.LIGHT_GRAY);
+            } else {
+                g2d.setColor(Color.WHITE);
+            }
             g2d.fillOval(p0.x - circleRadius, p0.y - circleRadius, circleRadius * 2, circleRadius * 2);
             g2d.setColor(Color.BLACK);
             g2d.drawOval(p0.x - circleRadius, p0.y - circleRadius, circleRadius * 2, circleRadius * 2);

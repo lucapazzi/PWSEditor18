@@ -215,9 +215,13 @@ public class StateMachinePanel extends JPanel implements MouseListener, MouseMot
 
         // For triggerable transitions, the draggable label is now used.
         if (!t.isTriggerable()) {
-            // If not triggerable, for autonomous transitions, draw a dot at the start point.
             int circleRadius = 5;
-            g2d.setColor(Color.WHITE);
+            // Gray for initial transition from pseudostate, white otherwise
+            if (sourceState.getName().equals("PseudoState")) {
+                g2d.setColor(Color.LIGHT_GRAY);
+            } else {
+                g2d.setColor(Color.WHITE);
+            }
             g2d.fillOval(p0.x - circleRadius, p0.y - circleRadius, circleRadius * 2, circleRadius * 2);
             g2d.setColor(Color.BLACK);
             g2d.drawOval(p0.x - circleRadius, p0.y - circleRadius, circleRadius * 2, circleRadius * 2);

@@ -1,9 +1,8 @@
 package pws.editor;
 
+import assembly.Assembly;
 import pws.PWSState;
 import pws.editor.semantics.Semantics;
-import pws.editor.ConstraintsEditorDialog; // Import added
-import assembly.Assembly; // Import added
 import smalgebra.BasicStateProposition;
 
 import javax.swing.*;
@@ -57,31 +56,49 @@ public class ConstraintsEditorDialog extends JDialog {
         return result;
     }
 
+    private String getConstraintsTextFromState(PWSState state) {
+        // Convert the current constraints semantics into editable text lines
+        StringBuilder sb = new StringBuilder();
+        // Each configuration prints as "(m1.s1,m2.s2,...)"
+        for (Object cfg : state.getConstraintsSemantics().getConfigurations()) {
+            String s = cfg.toString();
+            // strip surrounding parentheses if present
+            if (s.startsWith("(") && s.endsWith(")")) {
+                s = s.substring(1, s.length() - 1);
+            }
+            // ensure comma + space separation
+            s = s.replace(",", ", ");
+            sb.append(s).append("\n");
+        }
+        return sb.toString();
+    }
+
     private Semantics parseConfigurationLine(String line) {
-        // A simple parser for a configuration line of the format:
-        // "M1: stateA, M2: stateB, ..."
+        // Remove surrounding parentheses if present
+        if (line.startsWith("(") && line.endsWith(")")) {
+            line = line.substring(1, line.length() - 1);
+        }
         String[] pairs = line.split(",");
-        // Start with the top semantics (i.e., universal configuration)
-        Semantics configSem = Semantics.top(assembly); // Modified call
+        // Start with universal (top) semantics
+        Semantics configSem = Semantics.top(assembly);
         for (String pair : pairs) {
-            String[] parts = pair.split(":");
-            if (parts.length == 2) {
-                String machine = parts[0].trim();
-                String machineState = parts[1].trim();
-                // Create a basic state proposition from the machine and machineState
-                BasicStateProposition bsp = new BasicStateProposition(machine, machineState);
-                // Convert the proposition into a configuration semantics
-                Semantics propositionSem = bsp.toSemantics(assembly); // Modified call
-                // Combine the constraint using AND, as all conditions must hold
-                configSem = configSem.AND(propositionSem);
+            String p = pair.trim();
+            String machine = null, stateName = null;
+            // support "machine:state" or "machine.state"
+            if (p.contains(":")) {
+                String[] parts = p.split(":", 2);
+                machine = parts[0].trim();
+                stateName = parts[1].trim();
+            } else if (p.contains(".")) {
+                String[] parts = p.split("\\.", 2);
+                machine = parts[0].trim();
+                stateName = parts[1].trim();
+            }
+            if (machine != null && stateName != null) {
+                BasicStateProposition bsp = new BasicStateProposition(machine, stateName);
+                configSem = configSem.AND(bsp.toSemantics(assembly));
             }
         }
         return configSem;
-    }
-
-    private String getConstraintsTextFromState(PWSState state) {
-        // Convert the current constraints semantics into a text representation
-        // that can be edited.
-        return state.getConstraintsSemantics().toString();
     }
 }

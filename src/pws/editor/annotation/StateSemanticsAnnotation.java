@@ -49,7 +49,15 @@ public class StateSemanticsAnnotation extends Annotation<PWSState> {
         int padding = 4;
         int y = fm.getHeight() + padding;
         // 1) Constraint semantics (blue, centered)
-        String constraintSem = (state.getConstraintsSemantics() == null ? "" : state.getConstraintsSemantics().toString());
+                String constraintSem;
+        if (state.isPseudoState()) {
+                // Pseudostate always shows “ANY”
+            constraintSem = "ANY";
+        } else {
+            constraintSem = (state.getConstraintsSemantics() == null
+                    ? ""
+                    : state.getConstraintsSemantics().toString());
+        }
         g2d.setColor(Color.BLUE);
         int w1 = fm.stringWidth(constraintSem);
         g2d.drawString(constraintSem, (getWidth() - w1) / 2, y);
@@ -76,12 +84,13 @@ public class StateSemanticsAnnotation extends Annotation<PWSState> {
             totalWidth += fm.stringWidth(s) + fm.charWidth(' ');
         }
         int x = (getWidth() - totalWidth) / 2;
-        for (String s : cfgStrs) {
-            boolean contained = constraintStrs.contains(s);
-            g2d.setColor(contained ? Color.GREEN.darker() : Color.RED);
-            g2d.drawString(s, x, y);
-            x += fm.stringWidth(s) + fm.charWidth(' ');
-        }
+                for (String s : cfgStrs) {
+                    // Always paint green for the pseudostate’s actual semantics
+                    boolean isGreen = state.isPseudoState() || constraintStrs.contains(s);
+                    g2d.setColor(isGreen ? Color.GREEN.darker() : Color.RED);
+                    g2d.drawString(s, x, y);
+                    x += fm.stringWidth(s) + fm.charWidth(' ');
+                }
 
         // 3) Reactive exit zones: green if covered, red otherwise
         y += fm.getHeight();
@@ -114,7 +123,15 @@ public class StateSemanticsAnnotation extends Annotation<PWSState> {
         if (content == null) return new Dimension(100, 50);
 
         PWSState state = content;
-        String constraintSem = (state.getConstraintsSemantics() == null) ? "" : state.getConstraintsSemantics().toString();
+        String constraintSem;
+        if (state.isPseudoState()) {
+            // Use the simple label "ANY" for sizing
+            constraintSem = "ANY";
+        } else {
+            constraintSem = (state.getConstraintsSemantics() == null)
+                ? ""
+                : state.getConstraintsSemantics().toString();
+        }
         String actualSem = (state.getStateSemantics() == null) ? "" : state.getStateSemantics().toString();
         String autonomousSem = (state.getReactiveSemantics() == null) ? "" : state.getReactiveSemantics().toString();
 
